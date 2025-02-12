@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../hooks/useUser";
 import { getRoleFolders, uploadToRoleFolder } from "../utils/files";
+import FileUpload from "../components/FileUpload";
+import ContainedButton from "../components/ContainedButton";
+import FileList from "../components/FileList";
 
 
 const Content = () => {
@@ -46,26 +49,19 @@ const Content = () => {
         if(user && user?.role && user?.token) getFolders();
     }, [user]);
 
-    console.log(folders)
+    console.log(file)
 
     return (
-        <div>
-            <h3>Upload</h3>
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={() => handleUpload(file, user?.role, user?.token)}>Upload</button>
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '50px 140px'}}>
+            <div>
+                <h3>Upload</h3>
+                <FileUpload onChange={handleFileChange} />
+                <ContainedButton text="Upload" onClick={() => handleUpload(file, user?.role, user?.token)} />
+                <p><b>Uploaded File:</b> {file ? file?.name : 'No File Selected'}</p>
+            </div>
 
             <div>
-                <h3>{user?.role} Files:</h3>
-
-                <ul>
-                    {
-                        folders?.map(file => (
-                            <a href={file?.url} target="_blank">
-                                <li className="border border-1 border-primary">{file.key}</li>
-                            </a>
-                        ))
-                    }
-                </ul>
+                <FileList title={`${user?.role} Files:`} items={folders} />
             </div>
         </div>
     );
