@@ -56,7 +56,7 @@ const Content = () => {
             <div>
                 <h3>Upload</h3>
                 <FileUpload onChange={handleFileChange} />
-                <ContainedButton text="Upload" onClick={() => handleUpload(file, user?.role, user?.token)} />
+                <ContainedButton text="Save" onClick={() => handleUpload(file, user?.role, user?.token)} />
                 <p><b>Uploaded File:</b> {file ? file?.name : 'No File Selected'}</p>
             </div>
 
