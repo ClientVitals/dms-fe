@@ -10,6 +10,7 @@ import FileList from "../components/FileList";
 const Content = () => {
     const [file, setFile] = useState(null);
     const [folders, setFolders] = useState(null);
+    const [message, setMessage] = useState(null);
     const { user } = useUser();
     const navigate = useNavigate();
 
@@ -36,9 +37,17 @@ const Content = () => {
             return;
         }
 
-        const result = await uploadToRoleFolder(file, role, token);
+        try {
+            const result = await uploadToRoleFolder(file, role, token);
 
-        console.log({result});
+            console.log({result});
+            setMessage('Upload Successful');
+            setFile(null);
+            setFolders(null);
+            await getFolders();
+        } catch (error) {
+            setMessage('There was an error');
+        }
     };
 
     useEffect(() => {
@@ -54,6 +63,7 @@ const Content = () => {
     return (
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '50px 140px'}}>
             <div>
+                {message && <p>{message}</p>}
                 <h3>Upload</h3>
                 <FileUpload onChange={handleFileChange} />
                 <ContainedButton text="Save" onClick={() => handleUpload(file, user?.role, user?.token)} />
