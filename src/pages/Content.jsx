@@ -5,18 +5,22 @@ import { getRoleFolders, uploadToRoleFolder } from "../utils/files";
 import FileUpload from "../components/FileUpload";
 import ContainedButton from "../components/ContainedButton";
 import FileList from "../components/FileList";
+import Dropdown from '../components/Dropdown';
 
 
 const Content = () => {
+    const admins = ["bjohnson@clientvitals.com", "wendy.biggs@clientvitals.com"]
     const [file, setFile] = useState(null);
     const [folders, setFolders] = useState(null);
     const [message, setMessage] = useState(null);
+    const [folderRole, setFolderRole] = useState(null);
     const { user } = useUser();
     const navigate = useNavigate();
 
     const getFolders = async () => {
+        if(!folderRole) return
         try {
-            const result = await getRoleFolders(user.role, user.token);
+            const result = await getRoleFolders(folderRole, user.token);
 
             setFolders(result);
         } catch(error) {
@@ -25,6 +29,8 @@ const Content = () => {
     }
 
     const handleFileChange = (event) => setFile(event.target.files[0]);
+
+    const handleRoleChange = (event) => setFolderRole(event.target.value);
 
     const handleUpload = async (file, role, token) => {
         if (!file) {
@@ -52,13 +58,12 @@ const Content = () => {
 
     useEffect(() => {
         if(!user?.name || !user?.token) navigate('/login');
+        else setFolderRole(user?.role);
     }, []);
 
     useEffect(() => {
-        if(user && user?.role && user?.token) getFolders();
-    }, [user]);
-
-    console.log(file)
+        if(user && folderRole && user?.token) getFolders();
+    }, [user, folderRole]);
 
     return (
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '50px 140px'}}>
@@ -66,12 +71,15 @@ const Content = () => {
                 {message && <p>{message}</p>}
                 <h3>Upload</h3>
                 <FileUpload onChange={handleFileChange} />
-                <ContainedButton text="Save" onClick={() => handleUpload(file, user?.role, user?.token)} />
+                <ContainedButton text="Save" onClick={() => handleUpload(file, folderRole, user?.token)} />
                 <p><b>Uploaded File:</b> {file ? file?.name : 'No File Selected'}</p>
             </div>
 
             <div>
-                <FileList title={`${user?.role} Files:`} items={folders} />
+                {
+                    admins.includes(user?.name?.toLowerCase()) && <Dropdown selectedOption={folderRole} handleChange={handleRoleChange} />
+                }
+                <FileList title={`${folderRole} Files:`} items={folders} />
             </div>
         </div>
     );

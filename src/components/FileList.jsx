@@ -18,7 +18,7 @@ const FileList = ({ title, items }) => (
     >
       {
         items?.map(item => (
-            <a href={item?.url} target='_blank'>
+            <a key={item.url} href={item?.url} target='_blank'>
               <ListItemButton>
                 <ListItemIcon>
                   <FileCopy />
