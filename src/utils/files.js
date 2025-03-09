@@ -18,9 +18,10 @@ export const getRoleFolders = async (role, token) => {
     }
 }
 
-export const uploadToRoleFolder = async (file, role, token) => {
+export const uploadToRoleFolder = async (file, role, token, subfolder) => {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("subfolder", subfolder);
 
     try {
         const response = await axios.post(`${API}/folders/${role}/upload`, formData, {

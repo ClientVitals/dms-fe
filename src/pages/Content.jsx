@@ -14,6 +14,8 @@ const Content = () => {
     const [folders, setFolders] = useState(null);
     const [message, setMessage] = useState(null);
     const [folderRole, setFolderRole] = useState(null);
+    const [subfolder, setSubfolder] = useState(null);
+
     const { user } = useUser();
     const navigate = useNavigate();
 
@@ -29,10 +31,10 @@ const Content = () => {
     }
 
     const handleFileChange = (event) => setFile(event.target.files[0]);
-
     const handleRoleChange = (event) => setFolderRole(event.target.value);
+    const handleSubfolderChange = (event) => setSubfolder(event.target.value);
 
-    const handleUpload = async (file, role, token) => {
+    const handleUpload = async (file, role, token, folderPath) => {
         if (!file) {
             alert("Please select a file first!");
             return;
@@ -44,9 +46,8 @@ const Content = () => {
         }
 
         try {
-            const result = await uploadToRoleFolder(file, role, token);
+            const result = await uploadToRoleFolder(file, role, token, subfolder);
 
-            console.log({result});
             setMessage('Upload Successful');
             setFile(null);
             setFolders(null);
@@ -65,21 +66,70 @@ const Content = () => {
         if(user && folderRole && user?.token) getFolders();
     }, [user, folderRole]);
 
+    const folderList = {};
+
+    folders?.forEach(folder => {
+        const splitFolder = folder?.key?.split('/');
+        const parentFolder = splitFolder[0];
+        let subfolder = '';
+        let file = '';
+        console.log(folder, splitFolder)
+        if(splitFolder?.length > 2) {
+            subfolder = splitFolder[1];
+            file = splitFolder[2];
+        } else {
+            file = splitFolder[1];
+        }
+
+        console.log({splitFolder, parentFolder, subfolder, file});
+        if(!folderList[parentFolder]) folderList[parentFolder] = {};
+
+        if(!folderList[parentFolder]?.general) folderList[parentFolder].general = [];
+
+        if(subfolder?.length) {
+            console.log({subfolder})
+            if(!folderList[parentFolder][subfolder]) folderList[parentFolder][subfolder] = [];
+
+            folderList[parentFolder][subfolder] = [
+                ...folderList[parentFolder][subfolder],
+                {
+                    key: file,
+                    url: folder?.url
+                }
+            ]
+        } else {
+            folderList[parentFolder] = {
+                ...folderList[parentFolder],
+                general: [...folderList[parentFolder]?.general, {
+                    key: file,
+                    url: folder?.url
+                }]
+            }
+        }
+    });
+
+    console.log({folderList})
+
     return (
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '50px 140px'}}>
-            <div>
+            <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', height: '400px'}}>
                 {message && <p>{message}</p>}
-                <h3>Upload</h3>
+                <p><b>Uploaded File:</b> {file ? file?.name : 'No File Selected'}</p>
+                <input 
+                    type="text" 
+                    value={subfolder} 
+                    onChange={handleSubfolderChange} 
+                    placeholder="Enter subfolder path (e.g., onboarding)"
+                />
                 <FileUpload onChange={handleFileChange} />
                 <ContainedButton text="Save" onClick={() => handleUpload(file, folderRole, user?.token)} />
-                <p><b>Uploaded File:</b> {file ? file?.name : 'No File Selected'}</p>
             </div>
 
             <div>
                 {
                     admins.includes(user?.name?.toLowerCase()) && <Dropdown selectedOption={folderRole} handleChange={handleRoleChange} />
                 }
-                <FileList title={`${folderRole} Files:`} items={folders} />
+                <FileList title={`${folderRole} Files:`} items={folderList} />
             </div>
         </div>
     );
