@@ -8,6 +8,7 @@ import FileCopy from '@mui/icons-material/FileCopy';
 import Folder from '@mui/icons-material/Folder';
 import FolderOpen from '@mui/icons-material/FolderOpen';
 import Collapse from '@mui/material/Collapse';
+import Button from '@mui/material/Button';
 
 const FileList = ({ title, items }) => {
   const [openFolders, setOpenFolders] = useState({});
@@ -17,13 +18,54 @@ const FileList = ({ title, items }) => {
       ...prev,
       [folderPath]: !prev[folderPath]
     }));
-  }
+  };
+
+  const getViewUrl = (fileUrl, fileType) => {
+    if (fileType.match(/(doc|docx|xls|xlsx)$/)) {
+      return `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+    }
+    if (fileType === 'csv') {
+      return `https://docs.google.com/spreadsheets/d/${encodeURIComponent(fileUrl)}`;
+    }
+    if (fileType === 'pdf') {
+      return fileUrl;
+    }
+    if (fileType.match(/(png|jpg|jpeg|gif|txt)$/)) {
+      return fileUrl;
+    }
+    return null; // Other files may not be viewable
+  };
+
+  const renderFiles = (folderPath, files) => (
+    <List component="div" disablePadding>
+      {files.map((file) => {
+        const fileType = file.key.split('.').pop().toLowerCase();
+        const viewUrl = getViewUrl(file.url, fileType);
+        
+        return (
+          <ListItemButton key={file.url}>
+            <ListItemIcon>
+              <FileCopy />
+            </ListItemIcon>
+            <ListItemText primary={file.key} />
+            <Button href={file.url} target="_blank" rel="noopener noreferrer" variant="outlined" size="small" style={{ marginRight: 8 }}>
+              Download
+            </Button>
+            {viewUrl && (
+              <Button href={viewUrl} target="_blank" rel="noopener noreferrer" variant="contained" size="small">
+                View
+              </Button>
+            )}
+          </ListItemButton>
+        );
+      })}
+    </List>
+  );
 
   const renderItems = (folderPath, folderContent) => (
     <List component="div" disablePadding>
       {Object.keys(folderContent).map((subfolder) => (
         <div key={subfolder}>
-          {/* Folder Item */}
           <ListItemButton onClick={() => handleFolderToggle(`${folderPath}/${subfolder}`)}>
             <ListItemIcon>
               {openFolders[`${folderPath}/${subfolder}`] ? <FolderOpen /> : <Folder />}
@@ -34,21 +76,6 @@ const FileList = ({ title, items }) => {
             {renderFiles(`${folderPath}/${subfolder}`, folderContent[subfolder] || [])}
           </Collapse>
         </div>
-      ))}
-    </List>
-  );
-
-  const renderFiles = (folderPath, files) => (
-    <List component="div" disablePadding>
-      {files.map((file) => (
-        <a key={file.url} href={file.url} target="_blank" rel="noopener noreferrer">
-          <ListItemButton>
-            <ListItemIcon>
-              <FileCopy />
-            </ListItemIcon>
-            <ListItemText primary={file.key} />
-          </ListItemButton>
-        </a>
       ))}
     </List>
   );
@@ -66,7 +93,6 @@ const FileList = ({ title, items }) => {
     >
       {Object.keys(items).map((folder) => (
         <div key={folder}>
-          {/* Folder Item */}
           <ListItemButton onClick={() => handleFolderToggle(folder)}>
             <ListItemIcon>
               {openFolders[folder] ? <FolderOpen /> : <Folder />}
@@ -80,6 +106,6 @@ const FileList = ({ title, items }) => {
       ))}
     </List>
   );
-}
+};
 
 export default FileList;

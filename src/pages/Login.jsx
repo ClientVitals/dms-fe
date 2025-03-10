@@ -32,8 +32,8 @@ const Login = () => {
     }
 
     return (
-        <div style={{ width: '600px', margin: '0 auto'}}>
-            <h4>
+        <div style={{ width: '600px', margin: '0 auto', padding: '50px 0 0 0'}}>
+            <h4 style={{ fontWeight: 'bold', margin: '0 0 10px 0' }}>
                 Enter Login
             </h4>
             {
