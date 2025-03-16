@@ -6,6 +6,8 @@ import FileUpload from "../components/FileUpload";
 import ContainedButton from "../components/ContainedButton";
 import FileList from "../components/FileList";
 import Dropdown from '../components/Dropdown';
+import { Input } from "@mui/material";
+import DocViewer from "../components/DocViewer";
 
 
 const Content = () => {
@@ -112,20 +114,23 @@ const Content = () => {
 
     return (
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '50px 140px'}}>
-            <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', height: '400px'}}>
-                {message && <p>{message}</p>}
-                <p><b>Uploaded File:</b> {file ? file?.name : 'No File Selected'}</p>
-                <input 
-                    type="text" 
-                    value={subfolder} 
-                    onChange={handleSubfolderChange} 
-                    placeholder="Enter subfolder path (e.g., onboarding)"
-                />
-                <FileUpload onChange={handleFileChange} />
-                <ContainedButton text="Save" onClick={() => handleUpload(file, folderRole, user?.token)} />
-            </div>
-
             <div>
+                <DocViewer />
+            </div>
+            <div>
+                <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', height: '250px'}}>
+                    {message && <p>{message}</p>}
+                    <p><b>Uploaded File:</b> {file ? file?.name : 'No File Selected'}</p>
+                    <Input 
+                        type="text" 
+                        value={subfolder} 
+                        onChange={handleSubfolderChange} 
+                        placeholder="Enter subfolder path (ie, onboarding, archival, staff)"
+                        style={{width: "50%"}}
+                    />
+                    <FileUpload onChange={handleFileChange} />
+                    <ContainedButton text="Save" onClick={() => handleUpload(file, folderRole, user?.token)} />
+                </div>
                 {
                     admins.includes(user?.name?.toLowerCase()) && <Dropdown selectedOption={folderRole} handleChange={handleRoleChange} />
                 }
